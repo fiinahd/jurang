@@ -1,17 +1,14 @@
-fastapi
-uvicorn[standard]
-pymongo              # untuk driver MongoDB dan modul bson
-motor                # async driver MongoDB
-python-dotenv
-pydantic
-pandas
-scikit-learn
-nltk
-python-multipart
+fastapi>=0.95,<1.0
+uvicorn[standard]>=0.22
+pymongo>=4.3
+motor>=3.1
+python-dotenv>=1.0
+# pydantic>=1.10
+pydantic>=1.10.0,<2.0.0
+python-multipart>=0.0.6
 
-dnspython            # DNS support untuk MongoDB+srv URIs
-typing-extensions    # Extended typing untuk Pydantic
-httpx                # HTTP client untuk testing
-ditto                # Test framework
-pytest               # Test framework
-gunicorn             # Production WSGI server (optional)
+nltk>=3.8
+pandas>=2.1
+openpyxl>=3.0
+
+scikit-learn>=1.2
