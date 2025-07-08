@@ -20,11 +20,8 @@ def run_training_pipeline(process_id: str, labeled_data_path: str):
             .explode('aspect')
             .reset_index(drop=True)
         )
-        # PERBAIKAN: Menghapus baris dengan aspek kosong setelah explode
         df_exploded = df_exploded[df_exploded['aspect'] != '']
         
-        # PERBAIKAN: Menangani kasus stratifikasi jika ada kelas dengan hanya 1 anggota
-        # Jika ada kelas yang terlalu sedikit, split biasa mungkin lebih aman
         try:
             strata_counts = df_exploded['sentiment'].value_counts()
             if strata_counts.min() < 2:
@@ -90,4 +87,4 @@ def run_training_pipeline(process_id: str, labeled_data_path: str):
 
         print(f"Training pipeline untuk process_id {process_id} selesai.")
     except Exception as e:
-        print(f"Error di training pipeline untuk process_id {process_id}: {e}")
+        print(f"ERROR DALAM PROSES TRAINING: {e}")

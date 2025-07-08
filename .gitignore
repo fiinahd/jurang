@@ -33,3 +33,7 @@ model_tfidf_knn.pkl
 
 # macOS files
 .DS_Store
+
+#result
+data/
+models_trained/

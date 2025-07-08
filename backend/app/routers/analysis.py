@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from typing import List
 import json
 
-# PERBAIKAN: Mengimpor modul dengan nama yang benar dari folder logic.
+# Mengimpor modul dengan nama yang benar dari folder logic.
 from ..logic import (
     l_1_preprocess as preprocess,
     l_2_postag as postag,
@@ -31,7 +31,6 @@ async def start_process(
     file: UploadFile = File(...)
 ):
     process_id = str(uuid.uuid4())
-    # PERBAIKAN: Menggunakan os.path.join untuk path yang lebih aman
     raw_file_path = os.path.join("data", f"raw_{process_id}.xlsx")
     cleaned_file_path = os.path.join("data", f"cleaned_{process_id}.csv")
 
@@ -57,7 +56,6 @@ async def get_preprocess_result(process_id: str):
         raise HTTPException(status_code=404, detail="File hasil preprocessing belum siap atau tidak ditemukan.")
     
     df = pd.read_csv(cleaned_file_path)
-    # PERBAIKAN: Mengatasi potensi nilai NaN yang tidak bisa di-serialize ke JSON
     df_preview = df.head(10).fillna('')
     preview = df_preview.to_dict(orient='records')
     columns = list(df.columns)
@@ -137,7 +135,6 @@ async def get_final_results(process_id: str):
 
     df_pred = pd.read_csv(prediction_path)
     display_cols = ['product_name', 'cleaned_review', 'aspect', 'predicted_sentiment']
-    # PERBAIKAN: Memastikan kolom yang ditampilkan ada di DataFrame
     df_display = df_pred[[col for col in display_cols if col in df_pred.columns]]
     df_display_preview = df_display.head(100).fillna('')
     
@@ -161,4 +158,3 @@ async def download_file(process_id: str, stage: str):
     if not file_path or not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File tidak ditemukan.")
     return FileResponse(path=file_path, filename=f"{stage}_{process_id}.csv", media_type='text/csv')
-

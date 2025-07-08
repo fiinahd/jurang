@@ -19,17 +19,23 @@ def _preprocess_text_internal(text: str, stemmer) -> str:
 def run_preprocessing(input_path: str, output_path: str, review_column: str, product_column: str):
     try:
         df = pd.read_excel(input_path)
-        # PERBAIKAN: Menangani kolom yang mungkin tidak ada atau kosong dengan aman
         df = df.dropna(subset=[product_column, review_column])
         df = df[~df[product_column].astype(str).str.lower().isin(['tidak tersedia'])]
 
         stemmer = StemmerFactory().create_stemmer()
         df['cleaned_review'] = df[review_column].apply(lambda text: _preprocess_text_internal(text, stemmer))
         
-        out_df = df[['product_name', 'cleaned_review']].copy()
+        # PERBAIKAN KUNCI: Menggunakan variabel `product_column` bukan string "product_name"
+        # dan menamainya kembali menjadi 'product_name' untuk konsistensi di tahap selanjutnya.
+        out_df = pd.DataFrame({
+            'product_name': df[product_column],
+            'cleaned_review': df['cleaned_review']
+        })
+        
         out_df = out_df[out_df['cleaned_review'].str.split().str.len() > 1]
         
         out_df.to_csv(output_path, index=False)
         print(f"Preprocessing selesai. Hasil disimpan di {output_path}")
     except Exception as e:
-        print(f"Error di preprocessing: {e}")
+        # Menampilkan error di console server untuk debugging
+        print(f"ERROR DALAM PROSES PREPROCESSING: {e}")
