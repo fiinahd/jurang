@@ -5,13 +5,11 @@ import json
 import os
 
 def write_progress(process_id: str, message: str):
-    """Helper function to write progress to a status file."""
     status_file = os.path.join("data", f"status_{process_id}.json")
     with open(status_file, "w") as f:
         json.dump({"status": message}, f)
 
 def _preprocess_text_internal(text: str, stemmer) -> str:
-    # ... (fungsi ini tidak berubah) ...
     if not isinstance(text, str): return ""
     text = text.lower()
     text = re.sub(r"\btp\b", "tapi", text)
@@ -40,7 +38,7 @@ def run_preprocessing(process_id: str, input_path: str, output_path: str, review
         cleaned_reviews = []
         for i, text in enumerate(df[review_column]):
             cleaned_reviews.append(_preprocess_text_internal(text, stemmer))
-            if (i + 1) % 20 == 0 or (i + 1) == total_rows: # Update progress setiap 20 baris
+            if (i + 1) % 20 == 0 or (i + 1) == total_rows:
                  write_progress(process_id, f"{i + 1}/{total_rows} baris diproses")
 
         df['cleaned_review'] = cleaned_reviews

@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Analisis Sentimen Berbasis Aspek</title>
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Vue.js for interactivity -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <!-- SheetJS for reading Excel files on the client-side -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -64,14 +61,14 @@
         <div v-if="currentStep === 'welcome'">
             <div class="text-center bg-white p-12 rounded-lg shadow-lg">
                 <h2 class="text-4xl font-bold text-indigo-600 mb-4">Selamat Datang</h2>
-                <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">Sistem Analisis Sentimen Berbasis Aspek. Mulai dari unggah data mentah hingga dapatkan hasil analisis sentimen.</p>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">Selamat datang di Sistem Analisis Sentimen Berbasis Aspek — solusi instan untuk memahami opini pelanggan per fitur produk: cukup unggah data mentah, biarkan sistem kami membersihkan dan menganalisis sentimen secara otomatis, lalu dapatkan data insight yang bisa dipakai untuk mendukung pengambilan keputusan.</p>
                 <button @click="startPipeline" class="btn-primary font-bold py-3 px-8 rounded-lg text-lg shadow-md hover:shadow-lg transition-shadow">Mulai Analisis</button>
             </div>
         </div>
         
         <div v-if="currentStep === 'upload'">
             <h2 class="text-3xl font-bold mb-2">Unggah Data Ulasan</h2>
-            <p class="text-gray-600 mb-6">Silakan unggah file Excel (.xlsx) yang berisi data ulasan Anda.</p>
+            <p class="text-gray-600 mb-6">Silakan unggah file yang berisi data ulasan.</p>
             <div class="bg-white p-8 rounded-lg shadow-md">
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                     <input type="file" @change="handleFileUpload" accept=".xlsx" class="hidden" ref="fileInput">
@@ -83,11 +80,11 @@
                     <h3 class="text-xl font-semibold mb-4">Pilih Kolom</h3>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label for="review_column" class="block text-sm font-medium text-gray-700 mb-1">Kolom Ulasan</label>
+                            <label for="review_column" class="block text-sm font-medium text-gray-700 mb-1">Kolom berisi teks Ulasan</label>
                             <select v-model="selectedReviewColumn" id="review_column" class="w-full p-2 border border-gray-300 rounded-md"><option disabled value="">Pilih satu</option><option v-for="col in columns" :key="col" :value="col">{{ col }}</option></select>
                         </div>
                         <div>
-                            <label for="product_column" class="block text-sm font-medium text-gray-700 mb-1">Kolom Nama Produk</label>
+                            <label for="product_column" class="block text-sm font-medium text-gray-700 mb-1">Kolom berisi Nama Produk</label>
                             <select v-model="selectedProductColumn" id="product_column" class="w-full p-2 border border-gray-300 rounded-md"><option disabled value="">Pilih satu</option><option v-for="col in columns" :key="col" :value="col">{{ col }}</option></select>
                         </div>
                     </div>
@@ -100,7 +97,7 @@
 
         <div v-if="currentStep === 'preprocessing'">
             <h2 class="text-3xl font-bold mb-2">Hasil Preprocessing</h2>
-            <p class="text-gray-600 mb-6">Data telah dibersihkan. Berikut adalah pratinjaunya.</p>
+            <p class="text-gray-600 mb-6">Data yang diunggah telah dibersihkan. Berikut adalah pratinjaunya.</p>
             <div class="bg-white p-8 rounded-lg shadow-md">
                 <div class="overflow-x-auto max-h-96"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th v-for="col in previewData.columns" :key="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ col }}</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr v-for="(row, index) in previewData.rows" :key="index"><td v-for="col in previewData.columns" :key="col" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ row[col] }}</td></tr></tbody></table></div>
                 <div class="mt-8 flex justify-between items-center">
@@ -112,14 +109,30 @@
         
         <div v-if="currentStep === 'aspect_extraction'">
             <h2 class="text-3xl font-bold mb-2">Ekstraksi & Pemilihan Aspek</h2>
-            <p class="text-gray-600 mb-6">Pilih aspek yang relevan untuk dianalisis dari kandidat berikut.</p>
+            <p class="text-gray-600 mb-6">Pilih aspek yang relevan dan cocok kemudian tentukan jumlah data untuk dilabeli.</p>
             <div class="bg-white p-8 rounded-lg shadow-md">
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <h3 class="text-xl font-semibold mb-2">Pilih Aspek Relevan</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
                     <div v-for="aspect in posTagResults" :key="aspect" class="flex items-center">
                         <input type="checkbox" :id="aspect" :value="aspect" v-model="selectedAspects" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                         <label :for="aspect" class="ml-2 block text-sm text-gray-900">{{ aspect }}</label>
                     </div>
                 </div>
+
+                <h3 class="text-xl font-semibold mb-2">Pilih Persentase Data untuk Pelabelan</h3>
+                <p class="text-sm text-gray-500 mb-4">Pilih berapa persen data yang mengandung aspek di atas untuk diambil sebagai sampel pelabelan. Persentase lebih tinggi akan menghasilkan data lebih representatif namun memerlukan waktu pelabelan lebih banyak</p>
+                <div>
+                    <select v-model="selectedSamplingPercentage" class="w-full md:w-1/3 p-2 border border-gray-300 rounded-md">
+                        <option value="10">10%</option>
+                        <option value="15">15%</option>
+                        <option value="20">20%</option>
+                        <option value="25">25%</option>
+                        <option value="30">30%</option>
+                        <option value="30">30%</option>
+                        <option value="40">40%</option>
+                    </select>
+                </div>
+
                 <div class="mt-8 flex justify-end">
                     <button @click="runRuleBasedExtraction" :disabled="selectedAspects.length === 0" class="btn-primary font-bold py-2 px-6 rounded-md disabled:bg-indigo-300 disabled:cursor-not-allowed">Gunakan Aspek & Lanjutkan</button>
                 </div>
@@ -127,8 +140,8 @@
         </div>
         
         <div v-if="currentStep === 'labeling'">
-            <h2 class="text-3xl font-bold mb-2">Pelabelan Manual</h2>
-            <p class="text-gray-600 mb-6">Beri label sentimen untuk sampel data berikut.</p>
+            <h2 class="text-3xl font-bold mb-2">Pelabelan Ulasan</h2>
+            <p class="text-gray-600 mb-6">Beri label sentimen pada ulasan pelanggan untuk sampel data berikut.</p>
             <div class="bg-white p-8 rounded-lg shadow-md">
                 <div class="mb-4 flex justify-between items-center">
                     <div>
@@ -150,7 +163,7 @@
 
         <div v-if="currentStep === 'results'">
             <h2 class="text-3xl font-bold mb-2">Hasil Akhir</h2>
-            <p class="text-gray-600 mb-6">Model KNN telah selesai dilatih. Berikut adalah hasil prediksi dan evaluasi model.</p>
+            <p class="text-gray-600 mb-6">Model KNN telah selesai dilatih. Berikut adalah hasil prediksi yang dimasukan kedalam seluruh data dan evaluasi model.</p>
             <div class="bg-white p-8 rounded-lg shadow-md mb-8">
                  <h3 class="text-2xl font-semibold mb-4">Prediksi Sentimen pada Semua Data</h3>
                  <div class="overflow-x-auto max-h-[60vh]"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr><th v-for="col in finalResults.columns" :key="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ col }}</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr v-for="(row, index) in finalResults.rows" :key="index"><td v-for="col in finalResults.columns" :key="col" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" :class="{'bg-green-100 text-green-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'positif', 'bg-red-100 text-red-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'negatif', 'bg-yellow-100 text-yellow-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'netral'}">{{ row[col] }}</td></tr></tbody></table></div>
@@ -191,6 +204,7 @@
                 previewData: { columns: [], rows: [] },
                 posTagResults: [],
                 selectedAspects: [],
+                selectedSamplingPercentage: 20,
                 labelingData: [],
                 evaluationResults: { report: '', matrix: { labels: [], values: [] } },
                 finalResults: { columns: [], rows: [] },
@@ -206,23 +220,15 @@
             }
         },
         computed: {
-            labeledCount() {
-                return this.labelingData.filter(item => item.sentiment).length;
-            },
-            labelingTotalPages() {
-                return Math.ceil(this.labelingData.length / this.labelingItemsPerPage);
-            },
+            labeledCount() { return this.labelingData.filter(item => item.sentiment).length; },
+            labelingTotalPages() { return Math.ceil(this.labelingData.length / this.labelingItemsPerPage); },
             paginatedLabelingData() {
                 const start = (this.labelingCurrentPage - 1) * this.labelingItemsPerPage;
                 const end = start + this.labelingItemsPerPage;
-                return this.labelingData.slice(start, end).map((item, index) => ({
-                    ...item,
-                    originalIndex: start + index
-                }));
+                return this.labelingData.slice(start, end).map((item, index) => ({ ...item, originalIndex: start + index }));
             }
         },
         methods: {
-            // --- Core Logic & Polling ---
             goToStep(stepIndex) { this.currentStepIndex = stepIndex; this.currentStep = this.steps[stepIndex].id; },
             startPipeline() { this.currentStep = 'upload'; this.currentStepIndex = 0; },
             restart() { Object.assign(this.$data, this.$options.data.apply(this)); },
@@ -236,6 +242,7 @@
             startProgressChecker() {
                 this.loadingProgress = '';
                 this.progressPoller = setInterval(async () => {
+                    if (!this.processId) return;
                     try {
                         const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/progress`);
                         if (response.ok) {
@@ -265,8 +272,6 @@
                     }
                 }, 3000);
             },
-            
-            // --- Step-by-step Functions ---
             handleFileUpload(event) {
                 this.file = event.target.files[0];
                 if (!this.file) return;
@@ -283,8 +288,7 @@
             },
             async runPreprocessing() {
                 if (!this.file || !this.selectedReviewColumn || !this.selectedProductColumn) return;
-                this.loadingText = 'Preprocessing';
-                this.isLoading = true;
+                this.loadingText = 'Preprocessing'; this.isLoading = true;
                 const formData = new FormData();
                 formData.append('file', this.file);
                 formData.append('review_column', this.selectedReviewColumn);
@@ -297,53 +301,46 @@
                     this.startProgressChecker();
                     const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/preprocess_result`;
                     this.pollForResult(resultUrl, (resultData) => {
-                        this.previewData = resultData.preview;
-                        this.isLoading = false;
-                        this.goToStep(1);
+                        this.previewData = resultData.preview; this.isLoading = false; this.goToStep(1);
                     });
                 } catch (error) { this.handleApiError(error); }
             },
             async runPosTagging() {
-                this.loadingText = 'Ekstraksi Aspek';
-                this.isLoading = true;
+                this.loadingText = 'Ekstraksi Aspek'; this.isLoading = true;
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/postag`, { method: 'POST' });
                     if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai POS Tagging.'); }
                     this.startProgressChecker();
                     const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/postag_result`;
                     this.pollForResult(resultUrl, (resultData) => {
-                        this.posTagResults = resultData.aspects;
-                        this.isLoading = false;
-                        this.goToStep(2);
+                        this.posTagResults = resultData.aspects; this.isLoading = false; this.goToStep(2);
                     });
                 } catch (error) { this.handleApiError(error); }
             },
             async runRuleBasedExtraction() {
-                this.loadingText = 'Menyiapkan data pelabelan...';
-                this.isLoading = true;
+                this.loadingText = 'Menyiapkan data pelabelan...'; this.isLoading = true;
                 try {
+                    const payload = {
+                        aspects: this.selectedAspects,
+                        sampling_percentage: parseInt(this.selectedSamplingPercentage)
+                    };
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/extract`, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ aspects: this.selectedAspects })
+                        body: JSON.stringify(payload)
                     });
                      if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal mengekstraksi aspek.'); }
                     const data = await response.json();
-                    this.labelingData = data.labeling_data;
-                    this.isLoading = false;
-                    this.goToStep(3);
+                    this.labelingData = data.labeling_data; this.isLoading = false; this.goToStep(3);
                 } catch (error) { this.handleApiError(error); }
             },
             setLabel(originalIndex, sentiment) { this.labelingData[originalIndex].sentiment = sentiment; },
             async submitLabels() {
-                this.loadingText = 'Training Model';
-                this.isLoading = true;
+                this.loadingText = 'Training Model'; this.isLoading = true;
                 const payload = { labels: this.labelingData };
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/train`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                     });
                     if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai proses training.'); }
                     this.startProgressChecker();

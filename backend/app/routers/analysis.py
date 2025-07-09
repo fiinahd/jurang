@@ -20,17 +20,15 @@ router = APIRouter(
     tags=["Analysis Pipeline"]
 )
 
-def write_progress(process_id: str, message: str):
-    """Helper function to write progress to a status file."""
-    status_file = os.path.join("data", f"status_{process_id}.json")
-    with open(status_file, "w") as f:
-        json.dump({"status": message}, f)
-
 def cleanup_files(process_id: str):
     """Deletes temporary status files."""
     status_file = os.path.join("data", f"status_{process_id}.json")
     if os.path.exists(status_file):
         os.remove(status_file)
+    # Hapus juga file hasil sementara jika ada
+    aspect_file = os.path.join("data", f"aspects_{process_id}.json")
+    if os.path.exists(aspect_file):
+        os.remove(aspect_file)
 
 @router.post("/start")
 async def start_process(
@@ -51,7 +49,7 @@ async def start_process(
 
     background_tasks.add_task(
         preprocess.run_preprocessing,
-        process_id=process_id, # Kirim process_id ke fungsi logic
+        process_id=process_id,
         input_path=raw_file_path,
         output_path=cleaned_file_path,
         review_column=review_column,
@@ -59,10 +57,8 @@ async def start_process(
     )
     return {"process_id": process_id, "message": "Preprocessing started."}
 
-# --- ENDPOINT BARU UNTUK PROGRESS ---
 @router.get("/{process_id}/progress")
 async def get_progress(process_id: str):
-    """Membaca file status dan mengembalikan progress saat ini."""
     status_file = os.path.join("data", f"status_{process_id}.json")
     if not os.path.exists(status_file):
         return {"status": "Memulai..."}
@@ -73,19 +69,17 @@ async def get_progress(process_id: str):
     except (json.JSONDecodeError, FileNotFoundError):
         return {"status": "Memulai..."}
 
-
 @router.get("/{process_id}/preprocess_result")
 async def get_preprocess_result(process_id: str):
     cleaned_file_path = os.path.join("data", f"cleaned_{process_id}.csv")
     if not os.path.exists(cleaned_file_path):
         raise HTTPException(status_code=404, detail="File hasil preprocessing belum siap atau tidak ditemukan.")
     
-    cleanup_files(process_id) # Hapus file status setelah selesai
+    cleanup_files(process_id)
     df = pd.read_csv(cleaned_file_path)
     df_preview = df.head(10).fillna('')
     preview = df_preview.to_dict(orient='records')
     columns = list(df.columns)
-
     return {"preview": {"columns": columns, "rows": preview}}
 
 @router.post("/{process_id}/postag")
@@ -116,7 +110,6 @@ async def get_postag_result(process_id: str):
 
 @router.post("/{process_id}/extract")
 async def run_extraction_endpoint(process_id: str, payload: AspectSelection):
-    # Proses ini cepat, jadi tidak perlu background task atau progress
     cleaned_file_path = os.path.join("data", f"cleaned_{process_id}.csv")
     extracted_file_path = os.path.join("data", f"extracted_{process_id}.csv")
     
@@ -136,7 +129,24 @@ async def run_extraction_endpoint(process_id: str, payload: AspectSelection):
     if df.empty:
         raise HTTPException(status_code=404, detail="Tidak ada aspek yang ditemukan di dalam data. Coba pilih aspek yang berbeda.")
 
-    sample_size = min(500, len(df))
+    total_rows = len(df)
+    percentage = payload.sampling_percentage / 100.0
+    sample_size_from_percentage = int(total_rows * percentage)
+
+    if total_rows > 2000:
+        sample_size = min(sample_size_from_percentage, 500)
+    else:
+        sample_size = sample_size_from_percentage
+
+    if total_rows > 0 and sample_size == 0:
+        sample_size = 1
+    
+    sample_size = min(sample_size, total_rows)
+    
+    print(f"Total baris dengan aspek: {total_rows}")
+    print(f"Pilihan pengguna: {payload.sampling_percentage}% ({sample_size_from_percentage} baris)")
+    print(f"Ukuran sampel akhir setelah aturan cerdas: {sample_size} baris")
+
     labeling_sample = df.sample(n=sample_size, random_state=42)
     labeling_sample['id'] = range(len(labeling_sample))
     

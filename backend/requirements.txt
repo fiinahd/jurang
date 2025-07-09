@@ -1,11 +1,10 @@
 fastapi
 uvicorn
 python-multipart
-motor
 pandas
 openpyxl
 scikit-learn
 joblib
-sastrawi
+Sastrawi
 stanza
 aiofiles

@@ -34,7 +34,6 @@ def run_postagging(process_id: str, input_csv: str, top_n: int = 30):
 
         top_nouns = [term for term, _ in counter.most_common(top_n)]
         
-        # Simpan hasil ke file JSON agar bisa dipolling
         result_file = os.path.join("data", f"aspects_{process_id}.json")
         with open(result_file, 'w') as f:
             json.dump({"aspects": top_nouns}, f)

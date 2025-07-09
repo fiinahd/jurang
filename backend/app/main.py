@@ -28,4 +28,4 @@ app.include_router(analysis.router)
 @app.get("/", tags=["Root"])
 async def read_root():
     """Endpoint utama untuk mengecek apakah server berjalan."""
-    return {"message": "Welcome to the ABSA API! Backend is running correctly."}
+    return {"message": "Backend is running correctly... enjoyy"}

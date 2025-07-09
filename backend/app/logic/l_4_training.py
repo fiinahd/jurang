@@ -16,18 +16,17 @@ def write_progress(process_id: str, message: str):
 def run_training_pipeline(process_id: str, labeled_data_path: str):
     try:
         write_progress(process_id, "Membagi data latih dan data uji...")
-        # --- 5.1: Split Data ---
         df_labeled = pd.read_csv(labeled_data_path)
-        # ... (logika split data tidak berubah) ...
+        df_labeled = df_labeled.dropna(subset=['detected_aspects', 'sentiment'])
+        
         df_exploded = (
-            df_labeled.dropna(subset=['detected_aspects', 'sentiment'])
-            .assign(aspect=lambda df: df['detected_aspects'].str.split(';'))
+            df_labeled
+            .assign(aspect=df_labeled['detected_aspects'].str.split(';'))
             .explode('aspect')
             .reset_index(drop=True)
         )
         df_exploded = df_exploded[df_exploded['aspect'] != '']
         
-        # ... (logika stratifikasi tidak berubah) ...
         try:
             stratify_param = df_exploded['sentiment'] if df_exploded['sentiment'].value_counts().min() >= 2 else None
             X_train, X_test = train_test_split(df_exploded, test_size=0.2, random_state=42, stratify=stratify_param)
@@ -38,7 +37,6 @@ def run_training_pipeline(process_id: str, labeled_data_path: str):
         test_df = X_test.copy()
 
         write_progress(process_id, "Melatih model KNN dengan TF-IDF...")
-        # --- 5.2: Train Model ---
         train_df['input'] = train_df['aspect'].astype(str) + " " + train_df['cleaned_review'].astype(str)
         pipeline = Pipeline([
             ("tfidf", TfidfVectorizer(ngram_range=(1,2))),
@@ -49,7 +47,6 @@ def run_training_pipeline(process_id: str, labeled_data_path: str):
         joblib.dump(pipeline, model_path)
 
         write_progress(process_id, "Mengevaluasi model...")
-        # --- 5.3: Evaluate Model ---
         test_df['input'] = test_df['aspect'].astype(str) + " " + test_df['cleaned_review'].astype(str)
         y_pred = pipeline.predict(test_df['input'])
         labels = sorted(test_df['sentiment'].unique())
@@ -62,7 +59,6 @@ def run_training_pipeline(process_id: str, labeled_data_path: str):
             json.dump(evaluation_results, f, indent=4)
 
         write_progress(process_id, "Memprediksi seluruh data...")
-        # --- 5.4: Predict on All Data ---
         all_data_path = os.path.join("data", f"extracted_{process_id}.csv")
         df_all = pd.read_csv(all_data_path)
         df_all_exploded = (
