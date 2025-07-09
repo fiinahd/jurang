@@ -11,42 +11,20 @@
     <!-- SheetJS for reading Excel files on the client-side -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* Custom styles for a better look and feel */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
         .step-item { transition: all 0.3s ease; }
-        .step-item.active {
-            background-color: #4f46e5; /* indigo-600 */
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        .step-item.completed {
-            background-color: #e5e7eb; /* gray-200 */
-            color: #16a34a; /* green-600 */
-        }
+        .step-item.active { background-color: #4f46e5; color: white; font-weight: 600; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .step-item.completed { background-color: #e5e7eb; color: #16a34a; }
         .step-item.completed .step-icon { opacity: 1; }
         .step-icon { transition: opacity 0.3s ease; }
         .btn-primary { background-color: #4f46e5; color: white; transition: background-color 0.3s; }
         .btn-primary:hover { background-color: #4338ca; }
         .btn-secondary { background-color: #e5e7eb; color: #374151; transition: background-color 0.3s; }
         .btn-secondary:hover { background-color: #d1d5db; }
-        .loader {
-            border-top-color: #4f46e5;
-            -webkit-animation: spinner 1.5s linear infinite;
-            animation: spinner 1.5s linear infinite;
-        }
-        @-webkit-keyframes spinner {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
-        }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .loader { border-top-color: #4f46e5; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @-webkit-keyframes spinner { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -58,25 +36,21 @@
         <div class="flex flex-col items-center">
             <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
             <h2 class="text-center text-white text-xl font-semibold">{{ loadingText }}</h2>
-            <!-- Real progress can be implemented here if backend provides it -->
+            <p v-if="loadingProgress" class="text-center text-gray-300 text-lg mt-2">{{ loadingProgress }}</p>
         </div>
     </div>
 
-    <!-- Sidebar / Progress Bar -->
+    <!-- Sidebar -->
     <aside class="w-full md:w-64 bg-white p-6 border-r border-gray-200 shadow-md">
         <div class="flex items-center mb-8">
-            <svg class="h-10 w-10 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.573L16.5 21.75l-.398-1.177a3.375 3.375 0 00-2.964-2.964L12 17.25l1.177-.398a3.375 3.375 0 002.964-2.964L16.5 12.75l.398 1.177a3.375 3.375 0 002.964 2.964L21 17.25l-1.177.398a3.375 3.375 0 00-2.964 2.964z" />
-            </svg>
+            <svg class="h-10 w-10 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.573L16.5 21.75l-.398-1.177a3.375 3.375 0 00-2.964-2.964L12 17.25l1.177-.398a3.375 3.375 0 002.964-2.964L16.5 12.75l.398 1.177a3.375 3.375 0 002.964 2.964L21 17.25l-1.177.398a3.375 3.375 0 00-2.964 2.964z" /></svg>
             <h1 class="text-2xl font-bold text-gray-800">ABSA</h1>
         </div>
         <nav>
             <ul>
                 <li v-for="(step, index) in steps" :key="step.id" class="mb-2">
                     <div class="step-item flex items-center p-3 rounded-lg" :class="{ 'active': currentStepIndex === index, 'completed': currentStepIndex > index }">
-                        <span class="step-icon mr-3 text-green-600" :class="{'opacity-0': currentStepIndex <= index}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                        </span>
+                        <span class="step-icon mr-3 text-green-600" :class="{'opacity-0': currentStepIndex <= index}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></span>
                         <span class="flex-grow">{{ step.name }}</span>
                     </div>
                 </li>
@@ -86,8 +60,7 @@
 
     <!-- Main Content -->
     <main class="flex-1 p-6 md:p-10">
-
-        <!-- STEP 0: Landing Page -->
+        
         <div v-if="currentStep === 'welcome'">
             <div class="text-center bg-white p-12 rounded-lg shadow-lg">
                 <h2 class="text-4xl font-bold text-indigo-600 mb-4">Selamat Datang</h2>
@@ -96,7 +69,6 @@
             </div>
         </div>
         
-        <!-- STEP 1: Upload Data -->
         <div v-if="currentStep === 'upload'">
             <h2 class="text-3xl font-bold mb-2">Unggah Data Ulasan</h2>
             <p class="text-gray-600 mb-6">Silakan unggah file Excel (.xlsx) yang berisi data ulasan Anda.</p>
@@ -126,7 +98,6 @@
             </div>
         </div>
 
-        <!-- STEP 2: Preprocessing Result -->
         <div v-if="currentStep === 'preprocessing'">
             <h2 class="text-3xl font-bold mb-2">Hasil Preprocessing</h2>
             <p class="text-gray-600 mb-6">Data telah dibersihkan. Berikut adalah pratinjaunya.</p>
@@ -139,7 +110,6 @@
             </div>
         </div>
         
-        <!-- STEP 3: Aspect Extraction -->
         <div v-if="currentStep === 'aspect_extraction'">
             <h2 class="text-3xl font-bold mb-2">Ekstraksi & Pemilihan Aspek</h2>
             <p class="text-gray-600 mb-6">Pilih aspek yang relevan untuk dianalisis dari kandidat berikut.</p>
@@ -156,7 +126,6 @@
             </div>
         </div>
         
-        <!-- STEP 4: Manual Labeling -->
         <div v-if="currentStep === 'labeling'">
             <h2 class="text-3xl font-bold mb-2">Pelabelan Manual</h2>
             <p class="text-gray-600 mb-6">Beri label sentimen untuk sampel data berikut.</p>
@@ -166,15 +135,10 @@
                         <p class="font-semibold">Progress: {{ labeledCount }} / {{ labelingData.length }} data dilabeli</p>
                         <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1"><div class="bg-indigo-600 h-2.5 rounded-full" :style="{ width: (labeledCount / labelingData.length * 100) + '%' }"></div></div>
                     </div>
-                    <!-- Pagination Controls -->
                     <div class="flex items-center" v-if="labelingTotalPages > 1">
-                        <button @click="labelingCurrentPage--" :disabled="labelingCurrentPage === 1" class="btn-secondary p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                        </button>
+                        <button @click="labelingCurrentPage--" :disabled="labelingCurrentPage === 1" class="btn-secondary p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg></button>
                         <span class="mx-3 text-sm font-medium">Halaman {{ labelingCurrentPage }} dari {{ labelingTotalPages }}</span>
-                        <button @click="labelingCurrentPage++" :disabled="labelingCurrentPage === labelingTotalPages" class="btn-secondary p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
-                        </button>
+                        <button @click="labelingCurrentPage++" :disabled="labelingCurrentPage === labelingTotalPages" class="btn-secondary p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg></button>
                     </div>
                 </div>
                 <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Ulasan Bersih</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Aspek Terdeteksi</th><th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Label Sentimen</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr v-for="(item, index) in paginatedLabelingData" :key="item.id"><td class="px-6 py-4 text-sm text-gray-500">{{ item.cleaned_review }}</td><td class="px-6 py-4 text-sm font-semibold text-gray-800">{{ item.detected_aspects }}</td><td class="px-6 py-4 text-center"><div class="inline-flex rounded-md shadow-sm" role="group"><button @click="setLabel(item.originalIndex, 'positif')" :class="{'bg-green-500 text-white': item.sentiment === 'positif', 'bg-white': item.sentiment !== 'positif'}" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10">Positif</button><button @click="setLabel(item.originalIndex, 'netral')" :class="{'bg-yellow-400 text-white': item.sentiment === 'netral', 'bg-white': item.sentiment !== 'netral'}" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10">Netral</button><button @click="setLabel(item.originalIndex, 'negatif')" :class="{'bg-red-500 text-white': item.sentiment === 'negatif', 'bg-white': item.sentiment !== 'negatif'}" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 focus:z-10">Negatif</button></div></td></tr></tbody></table></div>
@@ -184,12 +148,9 @@
             </div>
         </div>
 
-        <!-- STEP 5: Evaluation & Results -->
         <div v-if="currentStep === 'results'">
             <h2 class="text-3xl font-bold mb-2">Hasil Akhir</h2>
             <p class="text-gray-600 mb-6">Model KNN telah selesai dilatih. Berikut adalah hasil prediksi dan evaluasi model.</p>
-            
-            <!-- Final Predictions -->
             <div class="bg-white p-8 rounded-lg shadow-md mb-8">
                  <h3 class="text-2xl font-semibold mb-4">Prediksi Sentimen pada Semua Data</h3>
                  <div class="overflow-x-auto max-h-[60vh]"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr><th v-for="col in finalResults.columns" :key="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ col }}</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr v-for="(row, index) in finalResults.rows" :key="index"><td v-for="col in finalResults.columns" :key="col" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" :class="{'bg-green-100 text-green-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'positif', 'bg-red-100 text-red-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'negatif', 'bg-yellow-100 text-yellow-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'netral'}">{{ row[col] }}</td></tr></tbody></table></div>
@@ -198,8 +159,6 @@
                     <button @click="restart" class="btn-primary font-bold py-2 px-6 rounded-md">Mulai Analisis Baru</button>
                 </div>
             </div>
-
-            <!-- Evaluation Metrics -->
             <div class="bg-white p-8 rounded-lg shadow-md">
                 <h3 class="text-2xl font-semibold mb-4">Evaluasi Model</h3>
                 <h4 class="text-lg font-semibold mb-2">Classification Report</h4>
@@ -223,6 +182,8 @@
                 processId: null,
                 isLoading: false,
                 loadingText: 'Memproses...',
+                loadingProgress: '',
+                progressPoller: null,
                 file: null,
                 columns: [],
                 selectedReviewColumn: '',
@@ -233,11 +194,8 @@
                 labelingData: [],
                 evaluationResults: { report: '', matrix: { labels: [], values: [] } },
                 finalResults: { columns: [], rows: [] },
-                
-                // Pagination for labeling
                 labelingCurrentPage: 1,
                 labelingItemsPerPage: 50,
-
                 steps: [
                     { id: 'upload', name: 'Unggah Data' },
                     { id: 'preprocessing', name: 'Preprocessing' },
@@ -257,7 +215,6 @@
             paginatedLabelingData() {
                 const start = (this.labelingCurrentPage - 1) * this.labelingItemsPerPage;
                 const end = start + this.labelingItemsPerPage;
-                // Menambahkan originalIndex agar bisa update data di array utama
                 return this.labelingData.slice(start, end).map((item, index) => ({
                     ...item,
                     originalIndex: start + index
@@ -265,38 +222,51 @@
             }
         },
         methods: {
-            goToStep(stepIndex) {
-                this.currentStepIndex = stepIndex;
-                this.currentStep = this.steps[stepIndex].id;
-            },
-            startPipeline() {
-                this.currentStep = 'upload';
-                this.currentStepIndex = 0;
-            },
-            restart() {
-                Object.assign(this.$data, this.$options.data.apply(this));
-            },
+            // --- Core Logic & Polling ---
+            goToStep(stepIndex) { this.currentStepIndex = stepIndex; this.currentStep = this.steps[stepIndex].id; },
+            startPipeline() { this.currentStep = 'upload'; this.currentStepIndex = 0; },
+            restart() { Object.assign(this.$data, this.$options.data.apply(this)); },
             handleApiError(error) {
                 this.isLoading = false;
+                clearInterval(this.progressPoller);
+                this.loadingProgress = '';
                 console.error("API Error:", error);
                 alert(`Terjadi kesalahan: ${error.message || 'Tidak dapat terhubung ke server.'}`);
             },
-            async pollUntilReady(checkUrl, successCallback) {
-                try {
-                    const response = await fetch(checkUrl);
-                    if (response.ok) {
-                        const data = await response.json();
-                        successCallback(data);
-                    } else if (response.status === 404) {
-                        setTimeout(() => this.pollUntilReady(checkUrl, successCallback), 3000);
-                    } else {
-                        const errorData = await response.json();
-                        throw new Error(errorData.detail || `Server mengembalikan status ${response.status}`);
-                    }
-                } catch (error) {
-                    this.handleApiError(error);
-                }
+            startProgressChecker() {
+                this.loadingProgress = '';
+                this.progressPoller = setInterval(async () => {
+                    try {
+                        const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/progress`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.loadingProgress = data.status;
+                        }
+                    } catch (error) { /* Ignore small polling errors */ }
+                }, 2000);
             },
+            pollForResult(resultUrl, successCallback) {
+                const poller = setInterval(async () => {
+                    try {
+                        const response = await fetch(resultUrl);
+                        if (response.ok) {
+                            clearInterval(poller);
+                            clearInterval(this.progressPoller);
+                            this.loadingProgress = '';
+                            const data = await response.json();
+                            successCallback(data);
+                        } else if (response.status !== 404) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.detail || `Server error: ${response.status}`);
+                        }
+                    } catch (error) {
+                        clearInterval(poller);
+                        this.handleApiError(error);
+                    }
+                }, 3000);
+            },
+            
+            // --- Step-by-step Functions ---
             handleFileUpload(event) {
                 this.file = event.target.files[0];
                 if (!this.file) return;
@@ -313,116 +283,80 @@
             },
             async runPreprocessing() {
                 if (!this.file || !this.selectedReviewColumn || !this.selectedProductColumn) return;
-                
-                this.loadingText = 'Memulai preprocessing...';
+                this.loadingText = 'Preprocessing';
                 this.isLoading = true;
-
                 const formData = new FormData();
                 formData.append('file', this.file);
                 formData.append('review_column', this.selectedReviewColumn);
                 formData.append('product_column', this.selectedProductColumn);
-
                 try {
-                    const response = await fetch(`${this.API_BASE_URL}/api/process/start`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.detail || 'Gagal memulai proses.');
-                    }
-                    
+                    const response = await fetch(`${this.API_BASE_URL}/api/process/start`, { method: 'POST', body: formData });
+                    if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai proses.'); }
                     const data = await response.json();
                     this.processId = data.process_id;
-                    
-                    this.loadingText = 'Preprocessing berjalan...';
-                    const checkUrl = `${this.API_BASE_URL}/api/process/${this.processId}/preprocess_result`;
-                    this.pollUntilReady(checkUrl, (resultData) => {
+                    this.startProgressChecker();
+                    const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/preprocess_result`;
+                    this.pollForResult(resultUrl, (resultData) => {
                         this.previewData = resultData.preview;
                         this.isLoading = false;
                         this.goToStep(1);
                     });
-
-                } catch (error) {
-                    this.handleApiError(error);
-                }
+                } catch (error) { this.handleApiError(error); }
             },
             async runPosTagging() {
-                this.loadingText = 'Mengekstraksi aspek...';
+                this.loadingText = 'Ekstraksi Aspek';
                 this.isLoading = true;
-
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/postag`, { method: 'POST' });
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.detail || 'Gagal menjalankan POS Tagging.');
-                    }
-                    const data = await response.json();
-                    this.posTagResults = data.aspects;
-                    this.isLoading = false;
-                    this.goToStep(2);
-                } catch (error) {
-                    this.handleApiError(error);
-                }
-            },
-            downloadFile(stage) {
-                window.location.href = `${this.API_BASE_URL}/api/process/${this.processId}/download/${stage}`;
+                    if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai POS Tagging.'); }
+                    this.startProgressChecker();
+                    const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/postag_result`;
+                    this.pollForResult(resultUrl, (resultData) => {
+                        this.posTagResults = resultData.aspects;
+                        this.isLoading = false;
+                        this.goToStep(2);
+                    });
+                } catch (error) { this.handleApiError(error); }
             },
             async runRuleBasedExtraction() {
                 this.loadingText = 'Menyiapkan data pelabelan...';
                 this.isLoading = true;
-
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/extract`, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ aspects: this.selectedAspects })
                     });
-                     if (!response.ok) {
-                         const errorData = await response.json();
-                         throw new Error(errorData.detail || 'Gagal mengekstraksi aspek.');
-                     }
+                     if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal mengekstraksi aspek.'); }
                     const data = await response.json();
                     this.labelingData = data.labeling_data;
                     this.isLoading = false;
                     this.goToStep(3);
-                } catch (error) {
-                    this.handleApiError(error);
-                }
+                } catch (error) { this.handleApiError(error); }
             },
-            setLabel(originalIndex, sentiment) {
-                this.labelingData[originalIndex].sentiment = sentiment;
-            },
+            setLabel(originalIndex, sentiment) { this.labelingData[originalIndex].sentiment = sentiment; },
             async submitLabels() {
-                this.loadingText = 'Memulai training model...';
+                this.loadingText = 'Training Model';
                 this.isLoading = true;
-
                 const payload = { labels: this.labelingData };
-
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/train`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.detail || 'Gagal memulai proses training.');
-                    }
-                    
-                    this.loadingText = 'Model sedang dilatih & dievaluasi...';
-                    const checkUrl = `${this.API_BASE_URL}/api/process/${this.processId}/results`;
-                    this.pollUntilReady(checkUrl, (resultData) => {
+                    if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai proses training.'); }
+                    this.startProgressChecker();
+                    const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/results`;
+                    this.pollForResult(resultUrl, (resultData) => {
                         this.evaluationResults = resultData.evaluation;
                         this.finalResults = resultData.predictions;
                         this.isLoading = false;
                         this.goToStep(4);
                     });
-
-                } catch (error) {
-                    this.handleApiError(error);
-                }
-            }
+                } catch (error) { this.handleApiError(error); }
+            },
+            downloadFile(stage) { window.location.href = `${this.API_BASE_URL}/api/process/${this.processId}/download/${stage}`; },
         }
     }).mount('#app')
 </script>

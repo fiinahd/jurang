@@ -5,10 +5,8 @@ from fastapi import (
     APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException
 )
 from fastapi.responses import FileResponse
-from typing import List
 import json
 
-# Mengimpor modul dengan nama yang benar dari folder logic.
 from ..logic import (
     l_1_preprocess as preprocess,
     l_2_postag as postag,
@@ -22,7 +20,18 @@ router = APIRouter(
     tags=["Analysis Pipeline"]
 )
 
-# --- TAHAP 1: UPLOAD & PREPROCESSING ---
+def write_progress(process_id: str, message: str):
+    """Helper function to write progress to a status file."""
+    status_file = os.path.join("data", f"status_{process_id}.json")
+    with open(status_file, "w") as f:
+        json.dump({"status": message}, f)
+
+def cleanup_files(process_id: str):
+    """Deletes temporary status files."""
+    status_file = os.path.join("data", f"status_{process_id}.json")
+    if os.path.exists(status_file):
+        os.remove(status_file)
+
 @router.post("/start")
 async def start_process(
     background_tasks: BackgroundTasks,
@@ -42,6 +51,7 @@ async def start_process(
 
     background_tasks.add_task(
         preprocess.run_preprocessing,
+        process_id=process_id, # Kirim process_id ke fungsi logic
         input_path=raw_file_path,
         output_path=cleaned_file_path,
         review_column=review_column,
@@ -49,12 +59,28 @@ async def start_process(
     )
     return {"process_id": process_id, "message": "Preprocessing started."}
 
+# --- ENDPOINT BARU UNTUK PROGRESS ---
+@router.get("/{process_id}/progress")
+async def get_progress(process_id: str):
+    """Membaca file status dan mengembalikan progress saat ini."""
+    status_file = os.path.join("data", f"status_{process_id}.json")
+    if not os.path.exists(status_file):
+        return {"status": "Memulai..."}
+    try:
+        with open(status_file, "r") as f:
+            data = json.load(f)
+        return data
+    except (json.JSONDecodeError, FileNotFoundError):
+        return {"status": "Memulai..."}
+
+
 @router.get("/{process_id}/preprocess_result")
 async def get_preprocess_result(process_id: str):
     cleaned_file_path = os.path.join("data", f"cleaned_{process_id}.csv")
     if not os.path.exists(cleaned_file_path):
         raise HTTPException(status_code=404, detail="File hasil preprocessing belum siap atau tidak ditemukan.")
     
+    cleanup_files(process_id) # Hapus file status setelah selesai
     df = pd.read_csv(cleaned_file_path)
     df_preview = df.head(10).fillna('')
     preview = df_preview.to_dict(orient='records')
@@ -62,24 +88,35 @@ async def get_preprocess_result(process_id: str):
 
     return {"preview": {"columns": columns, "rows": preview}}
 
-
-# --- TAHAP 2: POS TAGGING & PEMILIHAN ASPEK ---
 @router.post("/{process_id}/postag")
-async def run_pos_tagging_endpoint(process_id: str):
+async def run_pos_tagging_endpoint(process_id: str, background_tasks: BackgroundTasks):
     cleaned_file_path = os.path.join("data", f"cleaned_{process_id}.csv")
     if not os.path.exists(cleaned_file_path):
         raise HTTPException(status_code=404, detail="File cleaned tidak ditemukan.")
 
-    try:
-        top_aspects = postag.run_postagging(cleaned_file_path, top_n=30)
-        return {"aspects": top_aspects}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal saat POS Tagging: {e}")
+    background_tasks.add_task(
+        postag.run_postagging,
+        process_id=process_id,
+        input_csv=cleaned_file_path,
+        top_n=30
+    )
+    return {"message": "POS Tagging started."}
 
+@router.get("/{process_id}/postag_result")
+async def get_postag_result(process_id: str):
+    result_file = os.path.join("data", f"aspects_{process_id}.json")
+    if not os.path.exists(result_file):
+        raise HTTPException(status_code=404, detail="Hasil POS Tagging belum siap.")
+    
+    with open(result_file, 'r') as f:
+        data = json.load(f)
+    
+    cleanup_files(process_id)
+    return data
 
-# --- TAHAP 3: EKSTRAKSI BERBASIS ATURAN & PERSIAPAN LABELING ---
 @router.post("/{process_id}/extract")
 async def run_extraction_endpoint(process_id: str, payload: AspectSelection):
+    # Proses ini cepat, jadi tidak perlu background task atau progress
     cleaned_file_path = os.path.join("data", f"cleaned_{process_id}.csv")
     extracted_file_path = os.path.join("data", f"extracted_{process_id}.csv")
     
@@ -105,8 +142,6 @@ async def run_extraction_endpoint(process_id: str, payload: AspectSelection):
     
     return {"labeling_data": labeling_sample.to_dict(orient='records')}
 
-
-# --- TAHAP 4 & 5: MENERIMA LABEL, MELATIH MODEL, EVALUASI & PREDIKSI ---
 @router.post("/{process_id}/train")
 async def train_model_endpoint(process_id: str, payload: LabelingPayload, background_tasks: BackgroundTasks):
     labeled_data_path = os.path.join("data", f"labeled_{process_id}.csv")
@@ -121,7 +156,6 @@ async def train_model_endpoint(process_id: str, payload: LabelingPayload, backgr
     )
     return {"message": "Proses training, evaluasi, dan prediksi telah dimulai."}
 
-
 @router.get("/{process_id}/results")
 async def get_final_results(process_id: str):
     eval_path = os.path.join("models_trained", f"evaluation_{process_id}.json")
@@ -130,6 +164,7 @@ async def get_final_results(process_id: str):
     if not os.path.exists(eval_path) or not os.path.exists(prediction_path):
         raise HTTPException(status_code=404, detail="Hasil belum siap. Proses training mungkin masih berjalan.")
 
+    cleanup_files(process_id)
     with open(eval_path, 'r') as f:
         evaluation_results = json.load(f)
 
@@ -146,8 +181,6 @@ async def get_final_results(process_id: str):
     }
     return {"evaluation": evaluation_results, "predictions": final_results}
 
-
-# --- ENDPOINT UNTUK UNDUH FILE ---
 @router.get("/{process_id}/download/{stage}")
 async def download_file(process_id: str, stage: str):
     file_map = {
