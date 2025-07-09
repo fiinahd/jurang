@@ -6,7 +6,6 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 import json
-from collections import Counter
 
 from ..logic import (
     l_1_preprocess as preprocess,
@@ -14,7 +13,7 @@ from ..logic import (
     l_3_extraction as extraction,
     l_4_training as training
 )
-from ..models import AspectSelection, LabelingPayload, VisualizationData
+from ..models import AspectSelection, LabelingPayload
 
 router = APIRouter(
     prefix="/api/process",
@@ -22,77 +21,14 @@ router = APIRouter(
 )
 
 def cleanup_files(process_id: str):
-    """Menghapus file status sementara setelah proses selesai."""
+    """Deletes temporary status files."""
     status_file = os.path.join("data", f"status_{process_id}.json")
     if os.path.exists(status_file):
         os.remove(status_file)
+    # Hapus juga file hasil sementara jika ada
     aspect_file = os.path.join("data", f"aspects_{process_id}.json")
     if os.path.exists(aspect_file):
         os.remove(aspect_file)
-
-def _generate_visualization_data(df: pd.DataFrame) -> dict:
-    """
-    Memproses DataFrame hasil prediksi untuk menghasilkan data visualisasi.
-    """
-    if df.empty or 'aspect' not in df.columns:
-        return {
-            "net_sentiment_scores": [],
-            "aspect_details": {},
-            "all_aspects": []
-        }
-        
-    # 1. Hitung Net Sentiment Score (untuk Opsi 3)
-    sentiment_scores = []
-    all_aspects = sorted(df['aspect'].unique())
-
-    for aspect in all_aspects:
-        aspect_df = df[df['aspect'] == aspect]
-        counts = aspect_df['predicted_sentiment'].value_counts()
-        
-        pos = counts.get('positif', 0)
-        neg = counts.get('negatif', 0)
-        total = len(aspect_df)
-        
-        score = (pos - neg) / total if total > 0 else 0
-        sentiment_scores.append({"aspect": aspect, "score": score})
-
-    # Urutkan berdasarkan skor
-    sentiment_scores = sorted(sentiment_scores, key=lambda x: x['score'], reverse=True)
-
-    # 2. Siapkan data detail per aspek (untuk Opsi 1)
-    aspect_details = {}
-    for aspect in all_aspects:
-        aspect_df = df[df['aspect'] == aspect]
-        
-        # Distribusi sentimen
-        dist_counts = aspect_df['predicted_sentiment'].value_counts()
-        distribution = {
-            "positif": int(dist_counts.get('positif', 0)),
-            "negatif": int(dist_counts.get('negatif', 0)),
-            "netral": int(dist_counts.get('netral', 0))
-        }
-        
-        # Data untuk Word Cloud
-        word_clouds = {"positif": [], "negatif": [], "netral": []}
-        for sentiment in ['positif', 'negatif', 'netral']:
-            sentiment_df = aspect_df[aspect_df['predicted_sentiment'] == sentiment]
-            if not sentiment_df.empty:
-                text = ' '.join(sentiment_df['cleaned_review'].astype(str))
-                words = text.split()
-                word_counts = Counter(words)
-                top_words = word_counts.most_common(15)
-                word_clouds[sentiment] = top_words
-
-        aspect_details[aspect] = {
-            "sentiment_distribution": distribution,
-            "word_clouds": word_clouds
-        }
-
-    return {
-        "net_sentiment_scores": sentiment_scores,
-        "aspect_details": aspect_details,
-        "all_aspects": all_aspects
-    }
 
 @router.post("/start")
 async def start_process(
@@ -239,29 +175,22 @@ async def get_final_results(process_id: str):
         raise HTTPException(status_code=404, detail="Hasil belum siap. Proses training mungkin masih berjalan.")
 
     cleanup_files(process_id)
-    
     with open(eval_path, 'r') as f:
         evaluation_results = json.load(f)
 
     df_pred = pd.read_csv(prediction_path)
-    
-    visualization_data = _generate_visualization_data(df_pred)
-
     display_cols = ['product_name', 'cleaned_review', 'aspect', 'predicted_sentiment']
     df_display = df_pred[[col for col in display_cols if col in df_pred.columns]]
     df_display_preview = df_display.head(100).fillna('')
     
-    prediction_preview = {
-        "columns": list(df_display.columns),
-        "rows": df_display_preview.to_dict(orient='records')
-    }
-
-    return {
-        "evaluation": evaluation_results,
-        "predictions": prediction_preview,
-        "visualization": visualization_data
-    }
+    prediction_preview = df_display_preview.to_dict(orient='records')
     
+    final_results = {
+        "columns": list(df_display.columns),
+        "rows": prediction_preview
+    }
+    return {"evaluation": evaluation_results, "predictions": final_results}
+
 @router.get("/{process_id}/download/{stage}")
 async def download_file(process_id: str, stage: str):
     file_map = {

@@ -3,19 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>senna</title>
-    <!-- Favicon SVG -->
-    <link rel="icon" href="./assets/dexter.svg" type="image/svg+xml">
-    <!-- Fallback untuk browser yang kurang dukung SVG -->
-    <link rel="alternate icon" href="./assets/dexter.png" type="image/png">
+    <title>Sistem Analisis Sentimen Berbasis Aspek</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- LIBRARY BARU UNTUK VISUALISASI -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.js"></script>
-
     <style>
         body { font-family: 'Inter', sans-serif; }
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -49,12 +40,8 @@
     <!-- Sidebar -->
     <aside class="w-full md:w-64 bg-white p-6 border-r border-gray-200 shadow-md">
         <div class="flex items-center mb-8">
-            <img
-                src="./assets/dexter.svg"
-                alt="Logo website"
-                class="w-10 h-10 mr-3 flex-shrink-0"
-            />
-            <h1 class="text-2xl font-bold text-gray-800">senna</h1>
+            <svg class="h-10 w-10 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.573L16.5 21.75l-.398-1.177a3.375 3.375 0 00-2.964-2.964L12 17.25l1.177-.398a3.375 3.375 0 002.964-2.964L16.5 12.75l.398 1.177a3.375 3.375 0 002.964 2.964L21 17.25l-1.177.398a3.375 3.375 0 00-2.964 2.964z" /></svg>
+            <h1 class="text-2xl font-bold text-gray-800">ABSA</h1>
         </div>
         <nav>
             <ul>
@@ -74,7 +61,7 @@
         <div v-if="currentStep === 'welcome'">
             <div class="text-center bg-white p-12 rounded-lg shadow-lg">
                 <h2 class="text-4xl font-bold text-indigo-600 mb-4">Selamat Datang</h2>
-                <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8"> di Sistem Analisis Sentimen Berbasis Aspek — solusi untuk memahami opini pelanggan per fitur produk. cukup unggah data mentah, lalu sistem membersihkan dan menganalisis sentimen secara otomatis, dan dapatkan data insight yang bisa dipakai untuk mendukung pengambilan keputusan.</p>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">Selamat datang di Sistem Analisis Sentimen Berbasis Aspek — solusi instan untuk memahami opini pelanggan per fitur produk: cukup unggah data mentah, biarkan sistem kami membersihkan dan menganalisis sentimen secara otomatis, lalu dapatkan data insight yang bisa dipakai untuk mendukung pengambilan keputusan.</p>
                 <button @click="startPipeline" class="btn-primary font-bold py-3 px-8 rounded-lg text-lg shadow-md hover:shadow-lg transition-shadow">Mulai Analisis</button>
             </div>
         </div>
@@ -141,6 +128,7 @@
                         <option value="20">20%</option>
                         <option value="25">25%</option>
                         <option value="30">30%</option>
+                        <option value="30">30%</option>
                         <option value="40">40%</option>
                     </select>
                 </div>
@@ -176,48 +164,6 @@
         <div v-if="currentStep === 'results'">
             <h2 class="text-3xl font-bold mb-2">Hasil Akhir</h2>
             <p class="text-gray-600 mb-6">Model KNN telah selesai dilatih. Berikut adalah hasil prediksi yang dimasukan kedalam seluruh data dan evaluasi model.</p>
-            
-            <!-- BAGIAN BARU: VISUALISASI -->
-            <div id="visualization-section" class="mb-8" v-if="visualizationData">
-                <!-- Opsi 1: Dasbor Interaktif -->
-                <div class="bg-white p-8 rounded-lg shadow-md mb-8">
-                    <h3 class="text-2xl font-semibold mb-4">Dasbor Analisis Aspek</h3>
-                    <div class="mb-6">
-                        <label for="aspect-filter" class="block text-sm font-medium text-gray-700 mb-1">Pilih Aspek untuk Dianalisis:</label>
-                        <select v-model="selectedAspectForViz" @change="updateAspectDetails" id="aspect-filter" class="w-full md:w-1/3 p-2 border border-gray-300 rounded-md">
-                            <option v-for="aspect in visualizationData.all_aspects" :key="aspect" :value="aspect">{{ aspect }}</option>
-                        </select>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div>
-                            <h4 class="text-lg font-semibold mb-2">Distribusi Sentimen</h4>
-                            <div class="relative h-64"><canvas id="sentimentDistributionChart"></canvas></div>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-semibold mb-2">Kata Kunci Terkait (Word Cloud)</h4>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div>
-                                    <h5 class="text-md font-medium text-green-600">Positif</h5>
-                                    <canvas id="wordCloudPositive" class="border rounded-md w-full h-40"></canvas>
-                                </div>
-                                <div>
-                                    <h5 class="text-md font-medium text-red-600">Negatif</h5>
-                                    <canvas id="wordCloudNegative" class="border rounded-md w-full h-40"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Opsi 3: Peringkat Aspek -->
-                <div class="bg-white p-8 rounded-lg shadow-md mb-8">
-                    <h3 class="text-2xl font-semibold mb-4">Peringkat Aspek Berdasarkan Sentimen</h3>
-                    <p class="text-gray-600 mb-4">Aspek diurutkan dari yang paling positif hingga paling negatif berdasarkan skor sentimen bersih.</p>
-                    <div class="relative h-96"><canvas id="netSentimentChart"></canvas></div>
-                </div>
-            </div>
-            <!-- AKHIR BAGIAN VISUALISASI -->
-
             <div class="bg-white p-8 rounded-lg shadow-md mb-8">
                  <h3 class="text-2xl font-semibold mb-4">Prediksi Sentimen pada Semua Data</h3>
                  <div class="overflow-x-auto max-h-[60vh]"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr><th v-for="col in finalResults.columns" :key="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ col }}</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr v-for="(row, index) in finalResults.rows" :key="index"><td v-for="col in finalResults.columns" :key="col" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" :class="{'bg-green-100 text-green-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'positif', 'bg-red-100 text-red-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'negatif', 'bg-yellow-100 text-yellow-800 font-semibold': col === 'predicted_sentiment' && row[col] === 'netral'}">{{ row[col] }}</td></tr></tbody></table></div>
@@ -238,7 +184,7 @@
 </div>
 
 <script>
-    const { createApp, nextTick } = Vue
+    const { createApp } = Vue
 
     createApp({
         data() {
@@ -264,11 +210,6 @@
                 finalResults: { columns: [], rows: [] },
                 labelingCurrentPage: 1,
                 labelingItemsPerPage: 50,
-                // Data & State untuk Visualisasi
-                visualizationData: null,
-                selectedAspectForViz: '',
-                netSentimentChartInstance: null,
-                sentimentDistChartInstance: null,
                 steps: [
                     { id: 'upload', name: 'Unggah Data' },
                     { id: 'preprocessing', name: 'Preprocessing' },
@@ -304,8 +245,11 @@
                     if (!this.processId) return;
                     try {
                         const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/progress`);
-                        if (response.ok) { const data = await response.json(); this.loadingProgress = data.status; }
-                    } catch (error) { /* Ignore */ }
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.loadingProgress = data.status;
+                        }
+                    } catch (error) { /* Ignore small polling errors */ }
                 }, 2000);
             },
             pollForResult(resultUrl, successCallback) {
@@ -313,16 +257,24 @@
                     try {
                         const response = await fetch(resultUrl);
                         if (response.ok) {
-                            clearInterval(poller); clearInterval(this.progressPoller); this.loadingProgress = '';
-                            const data = await response.json(); successCallback(data);
+                            clearInterval(poller);
+                            clearInterval(this.progressPoller);
+                            this.loadingProgress = '';
+                            const data = await response.json();
+                            successCallback(data);
                         } else if (response.status !== 404) {
-                            const errorData = await response.json(); throw new Error(errorData.detail || `Server error: ${response.status}`);
+                            const errorData = await response.json();
+                            throw new Error(errorData.detail || `Server error: ${response.status}`);
                         }
-                    } catch (error) { clearInterval(poller); this.handleApiError(error); }
+                    } catch (error) {
+                        clearInterval(poller);
+                        this.handleApiError(error);
+                    }
                 }, 3000);
             },
             handleFileUpload(event) {
-                this.file = event.target.files[0]; if (!this.file) return;
+                this.file = event.target.files[0];
+                if (!this.file) return;
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const data = new Uint8Array(e.target.result);
@@ -336,7 +288,7 @@
             },
             async runPreprocessing() {
                 if (!this.file || !this.selectedReviewColumn || !this.selectedProductColumn) return;
-                this.loadingText = 'Proses Pembersihan Teks'; this.isLoading = true;
+                this.loadingText = 'Preprocessing'; this.isLoading = true;
                 const formData = new FormData();
                 formData.append('file', this.file);
                 formData.append('review_column', this.selectedReviewColumn);
@@ -344,36 +296,47 @@
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/start`, { method: 'POST', body: formData });
                     if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai proses.'); }
-                    const data = await response.json(); this.processId = data.process_id;
+                    const data = await response.json();
+                    this.processId = data.process_id;
                     this.startProgressChecker();
                     const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/preprocess_result`;
-                    this.pollForResult(resultUrl, (resultData) => { this.previewData = resultData.preview; this.isLoading = false; this.goToStep(1); });
+                    this.pollForResult(resultUrl, (resultData) => {
+                        this.previewData = resultData.preview; this.isLoading = false; this.goToStep(1);
+                    });
                 } catch (error) { this.handleApiError(error); }
             },
             async runPosTagging() {
-                this.loadingText = 'Ekstraksi Aspek dari data'; this.isLoading = true;
+                this.loadingText = 'Ekstraksi Aspek'; this.isLoading = true;
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/postag`, { method: 'POST' });
                     if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai POS Tagging.'); }
                     this.startProgressChecker();
                     const resultUrl = `${this.API_BASE_URL}/api/process/${this.processId}/postag_result`;
-                    this.pollForResult(resultUrl, (resultData) => { this.posTagResults = resultData.aspects; this.isLoading = false; this.goToStep(2); });
+                    this.pollForResult(resultUrl, (resultData) => {
+                        this.posTagResults = resultData.aspects; this.isLoading = false; this.goToStep(2);
+                    });
                 } catch (error) { this.handleApiError(error); }
             },
             async runRuleBasedExtraction() {
-                this.loadingText = 'Menyiapkan data untuk tahap pelabelan...'; this.isLoading = true;
+                this.loadingText = 'Menyiapkan data pelabelan...'; this.isLoading = true;
                 try {
-                    const payload = { aspects: this.selectedAspects, sampling_percentage: parseInt(this.selectedSamplingPercentage) };
+                    const payload = {
+                        aspects: this.selectedAspects,
+                        sampling_percentage: parseInt(this.selectedSamplingPercentage)
+                    };
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/extract`, { 
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
                      if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal mengekstraksi aspek.'); }
-                    const data = await response.json(); this.labelingData = data.labeling_data; this.isLoading = false; this.goToStep(3);
+                    const data = await response.json();
+                    this.labelingData = data.labeling_data; this.isLoading = false; this.goToStep(3);
                 } catch (error) { this.handleApiError(error); }
             },
             setLabel(originalIndex, sentiment) { this.labelingData[originalIndex].sentiment = sentiment; },
             async submitLabels() {
-                this.loadingText = 'Melatih Model'; this.isLoading = true;
+                this.loadingText = 'Training Model'; this.isLoading = true;
                 const payload = { labels: this.labelingData };
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/train`, {
@@ -385,89 +348,12 @@
                     this.pollForResult(resultUrl, (resultData) => {
                         this.evaluationResults = resultData.evaluation;
                         this.finalResults = resultData.predictions;
-                        this.visualizationData = resultData.visualization; // Simpan data visualisasi
-                        // Set aspek pertama sebagai default untuk dropdown
-                        if (this.visualizationData && this.visualizationData.all_aspects.length > 0) {
-                            this.selectedAspectForViz = this.visualizationData.all_aspects[0];
-                        }
                         this.isLoading = false;
                         this.goToStep(4);
-                        // Tunggu DOM update, lalu buat grafik
-                        nextTick(() => {
-                            this.createNetSentimentChart();
-                            this.updateAspectDetails();
-                        });
                     });
                 } catch (error) { this.handleApiError(error); }
             },
             downloadFile(stage) { window.location.href = `${this.API_BASE_URL}/api/process/${this.processId}/download/${stage}`; },
-
-            // --- METODE BARU UNTUK VISUALISASI ---
-            createNetSentimentChart() {
-                if (!this.visualizationData) return;
-                const ctx = document.getElementById('netSentimentChart').getContext('2d');
-                if (this.netSentimentChartInstance) {
-                    this.netSentimentChartInstance.destroy();
-                }
-                const data = this.visualizationData.net_sentiment_scores;
-                this.netSentimentChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.map(item => item.aspect),
-                        datasets: [{
-                            label: 'Net Sentiment Score',
-                            data: data.map(item => item.score),
-                            backgroundColor: data.map(item => item.score >= 0 ? 'rgba(74, 222, 128, 0.6)' : 'rgba(248, 113, 113, 0.6)'),
-                            borderColor: data.map(item => item.score >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'),
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: { x: { beginAtZero: true, min: -1, max: 1 } },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            },
-            updateAspectDetails() {
-                if (!this.visualizationData || !this.selectedAspectForViz) return;
-                const aspectData = this.visualizationData.aspect_details[this.selectedAspectForViz];
-                this.updateSentimentDistributionChart(aspectData.sentiment_distribution);
-                this.updateWordClouds(aspectData.word_clouds);
-            },
-            updateSentimentDistributionChart(distributionData) {
-                const ctx = document.getElementById('sentimentDistributionChart').getContext('2d');
-                if (this.sentimentDistChartInstance) {
-                    this.sentimentDistChartInstance.destroy();
-                }
-                this.sentimentDistChartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Positif', 'Negatif', 'Netral'],
-                        datasets: [{
-                            data: [distributionData.positif, distributionData.negatif, distributionData.netral],
-                            backgroundColor: ['rgba(74, 222, 128, 0.8)', 'rgba(248, 113, 113, 0.8)', 'rgba(250, 204, 21, 0.8)'],
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            },
-            updateWordClouds(wordCloudData) {
-                const options = {
-                    gridSize: 8,
-                    weightFactor: 4,
-                    fontFamily: 'Inter, sans-serif',
-                    color: 'random-dark',
-                    backgroundColor: '#fff',
-                    minRotation: 0,
-                    maxRotation: 0,
-                    shuffle: false,
-                };
-                WordCloud(document.getElementById('wordCloudPositive'), { ...options, list: wordCloudData.positif.length > 0 ? wordCloudData.positif : [['tidak ada data', 1]] });
-                WordCloud(document.getElementById('wordCloudNegative'), { ...options, list: wordCloudData.negatif.length > 0 ? wordCloudData.negatif : [['tidak ada data', 1]] });
-            }
         }
     }).mount('#app')
 </script>
