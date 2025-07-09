@@ -19,7 +19,6 @@ def run_extraction(input_path: str, output_path: str, selected_aspects: List[str
         
         if aspects:
             results.append({
-                'product_name': row.get('product_name', ''),
                 'cleaned_review': review,
                 'detected_aspects': ";".join(aspects),
             })

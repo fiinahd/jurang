@@ -23,35 +23,24 @@ def _preprocess_text_internal(text: str, stemmer) -> str:
     stemmed = [stemmer.stem(token) for token in tokens]
     return ' '.join(stemmed)
 
-def run_preprocessing(process_id: str, input_path: str, output_path: str, review_column: str, product_column: str):
+def run_preprocessing(process_id: str, input_path: str, output_path: str, review_column: str):
     try:
         write_progress(process_id, "Membaca file Excel...")
         df = pd.read_excel(input_path)
-        df = df.dropna(subset=[product_column, review_column])
-        df = df[~df[product_column].astype(str).str.lower().isin(['tidak tersedia'])]
-
+        df = df.dropna(subset=[review_column])
         total_rows = len(df)
         write_progress(process_id, f"0/{total_rows} baris diproses")
-
         stemmer = StemmerFactory().create_stemmer()
-        
         cleaned_reviews = []
         for i, text in enumerate(df[review_column]):
             cleaned_reviews.append(_preprocess_text_internal(text, stemmer))
             if (i + 1) % 20 == 0 or (i + 1) == total_rows:
                  write_progress(process_id, f"{i + 1}/{total_rows} baris diproses")
-
         df['cleaned_review'] = cleaned_reviews
-        
-        out_df = pd.DataFrame({
-            'product_name': df[product_column],
-            'cleaned_review': df['cleaned_review']
-        })
-        
+        out_df = df[['cleaned_review']].copy()
         out_df = out_df[out_df['cleaned_review'].str.split().str.len() > 1]
-        
         out_df.to_csv(output_path, index=False)
-        print(f"Preprocessing selesai untuk {process_id}. Hasil disimpan di {output_path}")
+        print(f"Preprocessing selesai untuk {process_id}.")
     except Exception as e:
         print(f"ERROR DALAM PROSES PREPROCESSING ({process_id}): {e}")
         write_progress(process_id, f"Error: {e}")
