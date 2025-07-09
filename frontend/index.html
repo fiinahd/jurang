@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Analisis Sentimen Berbasis Aspek</title>
+    <title>senna</title>
+    <!-- Favicon SVG -->
+    <link rel="icon" href="./assets/dexter.svg" type="image/svg+xml">
+    <!-- Fallback untuk browser yang kurang dukung SVG -->
+    <link rel="alternate icon" href="./assets/dexter.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -40,8 +44,12 @@
     <!-- Sidebar -->
     <aside class="w-full md:w-64 bg-white p-6 border-r border-gray-200 shadow-md">
         <div class="flex items-center mb-8">
-            <svg class="h-10 w-10 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.573L16.5 21.75l-.398-1.177a3.375 3.375 0 00-2.964-2.964L12 17.25l1.177-.398a3.375 3.375 0 002.964-2.964L16.5 12.75l.398 1.177a3.375 3.375 0 002.964 2.964L21 17.25l-1.177.398a3.375 3.375 0 00-2.964 2.964z" /></svg>
-            <h1 class="text-2xl font-bold text-gray-800">ABSA</h1>
+            <img
+                src="./assets/dexter.svg"
+                alt="Logo website"
+                class="w-10 h-10 mr-3 flex-shrink-0"
+            />
+            <h1 class="text-2xl font-bold text-gray-800">senna</h1>
         </div>
         <nav>
             <ul>
@@ -68,7 +76,7 @@
         
         <div v-if="currentStep === 'upload'">
             <h2 class="text-3xl font-bold mb-2">Unggah Data Ulasan</h2>
-            <p class="text-gray-600 mb-6">Silakan unggah file yang berisi data ulasan.</p>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8"> di Sistem Analisis Sentimen Berbasis Aspek — solusi untuk memahami opini pelanggan per fitur produk. cukup unggah data mentah, lalu sistem membersihkan dan menganalisis sentimen secara otomatis, dan dapatkan data insight yang bisa dipakai untuk mendukung pengambilan keputusan.</p>
             <div class="bg-white p-8 rounded-lg shadow-md">
                 <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                     <input type="file" @change="handleFileUpload" accept=".xlsx" class="hidden" ref="fileInput">
@@ -288,7 +296,7 @@
             },
             async runPreprocessing() {
                 if (!this.file || !this.selectedReviewColumn || !this.selectedProductColumn) return;
-                this.loadingText = 'Preprocessing'; this.isLoading = true;
+                this.loadingText = 'Proses Pembersihan Teks'; this.isLoading = true;
                 const formData = new FormData();
                 formData.append('file', this.file);
                 formData.append('review_column', this.selectedReviewColumn);
@@ -306,7 +314,7 @@
                 } catch (error) { this.handleApiError(error); }
             },
             async runPosTagging() {
-                this.loadingText = 'Ekstraksi Aspek'; this.isLoading = true;
+                this.loadingText = 'Ekstraksi Aspek dari data'; this.isLoading = true;
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/postag`, { method: 'POST' });
                     if (!response.ok) { const e = await response.json(); throw new Error(e.detail || 'Gagal memulai POS Tagging.'); }
@@ -318,7 +326,7 @@
                 } catch (error) { this.handleApiError(error); }
             },
             async runRuleBasedExtraction() {
-                this.loadingText = 'Menyiapkan data pelabelan...'; this.isLoading = true;
+                this.loadingText = 'Menyiapkan data untuk tahap pelabelan...'; this.isLoading = true;
                 try {
                     const payload = {
                         aspects: this.selectedAspects,
@@ -336,7 +344,7 @@
             },
             setLabel(originalIndex, sentiment) { this.labelingData[originalIndex].sentiment = sentiment; },
             async submitLabels() {
-                this.loadingText = 'Training Model'; this.isLoading = true;
+                this.loadingText = 'Melatih Model'; this.isLoading = true;
                 const payload = { labels: this.labelingData };
                 try {
                     const response = await fetch(`${this.API_BASE_URL}/api/process/${this.processId}/train`, {
