@@ -1,0 +1,91 @@
+==================================================
+            MEMULAI WHITE BOX TESTING
+==================================================
+
+--- Kasus Uji 1 ---
+Fungsi yang Diuji : _preprocess_text_internal
+Input              : 'Kualitasnya BAGUS!!, harganya juga oke.'
+Hasil Diharapkan   : 'kualitas bagus harga oke'
+Hasil Aktual       : 'kualitas bagus harga oke'
+Status             : Berhasil
+
+--- Kasus Uji 2 ---
+Fungsi yang Diuji : _preprocess_text_internal
+Input              : 'bahannya bagus tapi pengirimannya lama'
+Hasil Diharapkan   : 'bahan bagus kirim lama'
+Hasil Aktual       : 'bahan bagus kirim lama'
+Status             : Berhasil
+
+--- Kasus Uji 3 ---
+Fungsi yang Diuji : _preprocess_text_internal
+Input              : 'kainnya ciamik tenan'
+Hasil Diharapkan   : 'kain bagus sekali'
+Hasil Aktual       : 'kain ciamik tenan'
+Status             : Gagal
+
+--- Kasus Uji 4 ---
+Fungsi yang Diuji : run_postagging (Logic)
+Input              : 'desain tas modern bahan kuat'
+Hasil Diharapkan   : ['bahan', 'desain', 'tas']
+Hasil Aktual       : ['bahan', 'desain', 'tas']
+Status             : Berhasil
+
+--- Kasus Uji 5 ---
+Fungsi yang Diuji : _extract_aspects_internal
+Input              : ('kualitas bagus harga oke', {'kualitas', 'harga'})
+Hasil Diharapkan   : ['harga', 'kualitas']
+Hasil Aktual       : ['harga', 'kualitas']
+Status             : Berhasil
+
+--- Kasus Uji 6 ---
+Fungsi yang Diuji : _extract_aspects_internal
+Input              : ('desainnya keren', {'kualitas', 'harga'})
+Hasil Diharapkan   : []
+Hasil Aktual       : []
+Status             : Berhasil
+
+--- Kasus Uji 7 ---
+Fungsi yang Diuji : run_postagging (Logic)
+Input              : 'baru dipakai sekali sudah sobek'
+Hasil Diharapkan   : ['kualitas']
+Hasil Aktual       : []
+Status             : Gagal
+
+--- Kasus Uji 8 ---
+Fungsi yang Diuji : run_training_pipeline (Explode Logic)
+Input              : '1 ulasan, 2 aspek'
+Hasil Diharapkan   : '2 baris data'
+Hasil Aktual       : '2 baris data'
+Status             : Berhasil
+
+--- Kasus Uji 9 ---
+Fungsi yang Diuji : run_training_pipeline (Input Logic)
+Input              : 'Input gabungan'
+Hasil Diharapkan   : 'kualitas kualitas bagus harga oke'
+Hasil Aktual       : 'kualitas kualitas bagus harga oke'
+Status             : Berhasil
+
+--- Kasus Uji 10 ---
+Fungsi yang Diuji : joblib.load (Valid Path)
+Input              : 'Path model benar'
+Hasil Diharapkan   : 'Model berhasil dimuat'
+Hasil Aktual       : "Error: [Errno 2] No such file or directory: './models_trained/model_dummy.joblib'"
+Status             : Gagal
+
+--- Kasus Uji 11 ---
+Fungsi yang Diuji : joblib.load (Invalid Path)
+Input              : 'Path model salah'
+Hasil Diharapkan   : 'FileNotFoundError ditangani'
+Hasil Aktual       : 'FileNotFoundError ditangani'
+Status             : Berhasil
+
+--- Kasus Uji 12 ---
+Fungsi yang Diuji : main.py (Endpoint API)
+Input              : 'Request POST ke /api/process/start'
+Hasil Diharapkan   : 'Mengembalikan process_id'
+Hasil Aktual       : 'Mengembalikan process_id'
+Status             : Berhasil
+
+==================================================
+            WHITE BOX TESTING SELESAI
+==================================================

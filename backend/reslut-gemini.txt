@@ -1,0 +1,67 @@
+==================================================
+            MEMULAI WHITE BOX TESTING
+==================================================
+
+--- Kasus Uji 1 ---
+Fungsi/Logika yang Diuji : _preprocess_text_internal
+Input                    : 'Kualitasnya BAGUS bgt!!'
+Hasil Aktual             : 'kualitas bagus bgt'
+
+--- Kasus Uji 2 ---
+Fungsi/Logika yang Diuji : _preprocess_text_internal
+Input                    : 'bahannya bagus tapi pengirimannya lama'
+Hasil Aktual             : 'bahan bagus kirim lama'
+
+--- Kasus Uji 3 ---
+Fungsi/Logika yang Diuji : run_postagging (Logic)
+Input                    : 'desain tas modern bahan kuat'
+Hasil Aktual             : ['bahan', 'desain', 'tas']
+
+--- Kasus Uji 4 ---
+Fungsi/Logika yang Diuji : run_postagging (Logic)
+Input                    : 'sangat cepat sampai'
+Hasil Aktual             : []
+
+--- Kasus Uji 5 ---
+Fungsi/Logika yang Diuji : _extract_aspects_internal
+Input                    : ('kualitas bagus harga oke', {'kualitas', 'harga'})
+Hasil Aktual             : ['harga', 'kualitas']
+
+--- Kasus Uji 6 ---
+Fungsi/Logika yang Diuji : _extract_aspects_internal
+Input                    : ('desainnya keren', {'kualitas', 'harga'})
+Hasil Aktual             : []
+
+--- Kasus Uji 7 ---
+Fungsi/Logika yang Diuji : run_training_pipeline (Explode Logic)
+Input                    : '1 ulasan, 2 aspek'
+Hasil Aktual             : '2 baris data dihasilkan'
+
+--- Kasus Uji 8 ---
+Fungsi/Logika yang Diuji : run_training_pipeline (Input Logic)
+Input                    : 'Input gabungan'
+Hasil Aktual             : 'kualitas kualitas bagus harga oke'
+
+--- Kasus Uji 9 ---
+Fungsi/Logika yang Diuji : run_training_pipeline (Training)
+Input                    : 'Data latih valid'
+Hasil Aktual             : 'Simulasi: Model dilatih tanpa error.'
+
+--- Kasus Uji 10 ---
+Fungsi/Logika yang Diuji : run_training_pipeline (Evaluation)
+Input                    : 'Data uji valid'
+Hasil Aktual             : 'Simulasi: Laporan evaluasi dibuat.'
+
+--- Kasus Uji 11 ---
+Fungsi/Logika yang Diuji : run_training_pipeline (Prediction)
+Input                    : 'Seluruh data valid'
+Hasil Aktual             : 'Simulasi: Prediksi akhir dibuat.'
+
+--- Kasus Uji 12 ---
+Fungsi/Logika yang Diuji : main.py (Endpoint API)
+Input                    : 'Request POST ke /api/process/start'
+Hasil Aktual             : 'Sistem mengembalikan process_id dan memulai proses.'
+
+==================================================
+            WHITE BOX TESTING SELESAI
+==================================================

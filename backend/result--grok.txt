@@ -1,0 +1,79 @@
+==================================================
+Starting Whitebox Testing for senna
+==================================================
+
+--- Test Case 1 ---
+Module: _preprocess_text_internal
+Input: 'Kualitas BAGUS!!, harganya oke.'
+Expected: 'kualitas bagus harga oke'
+Actual: 'kualitas bagus harga oke'
+Status: PASS
+
+--- Test Case 2 ---
+Module: _preprocess_text_internal
+Input: '😊👍'
+Expected: 'emotikon terdeteksi'
+Actual: ''
+Status: FAIL
+Preprocessing selesai untuk bf72247d-df2f-459d-a4c6-b28552787acd.
+
+--- Test Case 3 ---
+Module: run_preprocessing
+Input: {'input_path': 'data/raw_bf72247d-df2f-459d-a4c6-b28552787acd.xlsx', 'output_path': 'data/cleaned_bf72247d-df2f-459d-a4c6-b28552787acd.csv', 'review_column': 'ulasan'}
+Expected: ['kualitas bagus', 'harga oke']
+Actual: 'data/cleaned_bf72247d-df2f-459d-a4c6-b28552787acd.csv'
+Status: PASS
+POS Tagging selesai untuk bf72247d-df2f-459d-a4c6-b28552787acd.
+
+--- Test Case 4 ---
+Module: run_postagging
+Input: {'input_csv': 'data/cleaned_bf72247d-df2f-459d-a4c6-b28552787acd_postag.csv', 'top_n': 30}
+Expected: ['desain', 'bahan']
+Actual: 'data/aspects_bf72247d-df2f-459d-a4c6-b28552787acd.json'
+Status: PASS
+POS Tagging selesai untuk bf72247d-df2f-459d-a4c6-b28552787acd.
+
+--- Test Case 5 ---
+Module: run_postagging
+Input: {'input_csv': 'data/invalid_bf72247d-df2f-459d-a4c6-b28552787acd.csv', 'top_n': 30}
+Expected: ['angka']
+Actual: 'data/aspects_bf72247d-df2f-459d-a4c6-b28552787acd.json'
+Status: FAIL
+
+--- Test Case 6 ---
+Module: _extract_aspects_internal
+Input: {'text': 'kualitas bagus', 'aspects': {'harga', 'kualitas'}}
+Expected: ['kualitas']
+Actual: ['kualitas']
+Status: PASS
+Ekstraksi selesai. Hasil disimpan di data/extracted_bf72247d-df2f-459d-a4c6-b28552787acd.csv
+
+--- Test Case 7 ---
+Module: run_extraction
+Input: {'input_path': 'data/cleaned_bf72247d-df2f-459d-a4c6-b28552787acd_extract.csv', 'output_path': 'data/extracted_bf72247d-df2f-459d-a4c6-b28552787acd.csv', 'selected_aspects': ['kualitas']}
+Expected: 'Empty CSV'
+Actual: 'Error: No columns to parse from file'
+Status: FAIL
+Ekstraksi selesai. Hasil disimpan di data/extracted_bf72247d-df2f-459d-a4c6-b28552787acd.csv
+
+--- Test Case 8 ---
+Module: Labeling API
+Input: {'process_id': 'bf72247d-df2f-459d-a4c6-b28552787acd', 'payload': {'aspects': ['kualitas'], 'sampling_percentage': 50}}
+Expected: '~50 rows'
+Actual: {'labeling_data': [{'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 0}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 1}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 2}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 3}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 4}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 5}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 6}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 7}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 8}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 9}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 10}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 11}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 12}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 13}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 14}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 15}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 16}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 17}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 18}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 19}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 20}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 21}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 22}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 23}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 24}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 25}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 26}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 27}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 28}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 29}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 30}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 31}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 32}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 33}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 34}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 35}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 36}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 37}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 38}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 39}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 40}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 41}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 42}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 43}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 44}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 45}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 46}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 47}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 48}, {'cleaned_review': 'kualitas bagus', 'detected_aspects': 'kualitas', 'id': 49}]}
+Status: PASS
+ERROR DALAM PROSES TRAINING (bf72247d-df2f-459d-a4c6-b28552787acd): With n_samples=1, test_size=0.2 and train_size=None, the resulting train set will be empty. Adjust any of the aforementioned parameters.
+
+--- Test Case 9 ---
+Module: run_training_pipeline
+Input: {'labeled_csv': 'data/labeled_bf72247d-df2f-459d-a4c6-b28552787acd.csv'}
+Expected: 'Model and predictions'
+Actual: 'models_trained/model_bf72247d-df2f-459d-a4c6-b28552787acd.joblib'
+Status: FAIL
+
+--- Test Case 10 ---
+Module: _generate_visualization_data
+Input: {}
+Expected: {'net_sentiment_scores': [{'aspect': 'kualitas', 'score': 0}], 'aspect_details': {}, 'all_aspects': []}
+Actual: {'net_sentiment_scores': [], 'aspect_details': {}, 'all_aspects': []}
+Status: FAIL
